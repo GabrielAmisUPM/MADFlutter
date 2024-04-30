@@ -25,6 +25,10 @@ class NavigationRailWidget extends StatelessWidget {
           icon: Icon(Icons.book),
           label: Text('Second'),
         ),
+        NavigationRailDestination(
+          icon: Icon(Icons.accessibility),
+          label: Text('Settings'),
+        ),
       ],
     );
   }

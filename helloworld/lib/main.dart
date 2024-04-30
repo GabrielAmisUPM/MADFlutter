@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:helloworld/screens/first.dart';
 import 'package:helloworld/screens/second.dart';
+import 'package:helloworld/screens/settings_screen.dart';
 import 'package:helloworld/widgets/navigation_rails.dart';
 
 void main() {
@@ -33,6 +34,7 @@ class _NavRailMenuState extends State<NavRailMenu> {
   final List<Widget> _widgetOptions = <Widget>[
     FirstScreen(),
     SecondScreen(),
+    SettingsScreen(),
   ];
 
   @override
