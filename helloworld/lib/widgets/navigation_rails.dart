@@ -29,6 +29,10 @@ class NavigationRailWidget extends StatelessWidget {
           icon: Icon(Icons.accessibility),
           label: Text('Settings'),
         ),
+        NavigationRailDestination(
+          icon: Icon(Icons.account_balance),
+          label: Text('Map'),
+        ),
       ],
     );
   }
