@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'settings_screen.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '/db/database_helper.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -16,6 +17,32 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   @override
+  List<Marker> markers = [];
+  @override
+  void initState() {
+    super.initState();
+    loadMarkers();
+  }
+// Function to laod list of markers from database
+  Future<void> loadMarkers() async {
+    final dbMarkers = await DatabaseHelper.instance.getCoordinates();
+    List<Marker> loadedMarkers = dbMarkers.map((record) {
+      return Marker(
+        point: LatLng(record['latitude'], record['longitude']),
+        width: 80,
+        height: 80,
+        child: Icon(
+          Icons.location_pin,
+          size: 60,
+          color: Colors.red,
+        ),
+      );
+    }).toList();
+    setState(() {
+      markers = loadedMarkers;
+    });
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: content(),
@@ -27,7 +54,7 @@ class _MapScreenState extends State<MapScreen> {
         options: const MapOptions(
             initialCenter: LatLng(40.38923590951672, -3.627749768768932),
             initialZoom: 15,
-            interactionOptions: InteractionOptions(flags: InteractiveFlag.doubleTapZoom)
+            interactionOptions: InteractionOptions(flags: InteractiveFlag.doubleTapZoom | InteractiveFlag.drag | InteractiveFlag.all)
         ),
         children: [openStreetMapTileLayer,
         MarkerLayer(markers: [

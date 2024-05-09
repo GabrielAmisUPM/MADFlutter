@@ -43,4 +43,24 @@ class _SecondScreenState extends State<SecondScreen> {
       ),
     );
   }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  // This method is called right after initState the first time
+  // the widget is built and when any dependencies of the InheritedWidget change.
+    print("didChangeDependencies: Dependencies updated.");
+  }
+  @override
+  void didUpdateWidget(SecondScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  // If the parent widget changes and has to rebuild this widget (because it needs to update the configuration),
+  // this method is called with the old widget as an argument.
+    print("didUpdateWidget: The widget has been updated from the parent.");
+  }
+  @override
+  void dispose() {
+  // This method is called when this state object is permanently removed.
+    print("dispose: Cleaning up before the state is destroyed.");
+    super.dispose();
+  }
 }

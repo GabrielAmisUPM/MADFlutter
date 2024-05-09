@@ -5,26 +5,105 @@ import 'package:geolocator/geolocator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'settings_screen.dart';
+import '/db/database_helper.dart';
+import 'package:logger/logger.dart';
+
+
 
 class FirstScreen extends StatefulWidget {
   @override
+  DatabaseHelper db = DatabaseHelper.instance;
   _FirstScreenState createState() => _FirstScreenState();
 }
 
 class _FirstScreenState extends State<FirstScreen> {
   StreamSubscription<Position>? _positionStreamSubscription;
   Position? _currentPosition;
+  DatabaseHelper db = DatabaseHelper.instance;
+
+  final logger = Logger();
+  final _uidController = TextEditingController();
+  final _tokenController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? uid = prefs.getString('uid');
+    String? token = prefs.getString('token');
+    if (uid == null || token == null) {
+      _showInputDialog();
+    } else {
+      logger.d("UID: $uid, Token: $token");
+    }
+  }
+  Future<void> _showInputDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter UID and Token'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: _uidController,
+                  decoration: InputDecoration(hintText: "UID"),
+                ),
+                TextField(
+                  controller: _tokenController,
+                  decoration: InputDecoration(hintText: "Token"),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Save'),
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('uid', _uidController.text);
+                await prefs.setString('token', _tokenController.text);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _uidController.dispose();
+    _tokenController.dispose();
+    super.dispose();
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
+    var logger = Logger();
+    logger.d("Debug message");
+    logger.w("Warning message!");
+    logger.e("Error message!!");
     return Scaffold(
     body:
     Center(
-      child: Column(
+      child:
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('First Screen'),
+          ElevatedButton(
+            onPressed: () => _showAlertDialog(context),
+            child: Text('Click on it'),
+          ),
           Switch(
             value: _positionStreamSubscription != null,
             onChanged: (value) {
@@ -73,6 +152,33 @@ class _FirstScreenState extends State<FirstScreen> {
         writePositionToFile(position);
       },
     );
+
+    // insert into sqflite db
+    _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+          (Position position) {
+        db.insertCoordinate(position);
+      },
+    );
+  }
+
+  void _showAlertDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Alert Dialog'),
+          content: Text('If you want to have you location, click on it'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
   void stopTracking() {
     _positionStreamSubscription?.cancel();
@@ -85,6 +191,7 @@ class _FirstScreenState extends State<FirstScreen> {
     String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     await file.writeAsString('${timestamp};${position.latitude};${position.longitude}\n', mode: FileMode.append);
   }
+
 }
 
 
