@@ -144,6 +144,8 @@ class _FirstScreenState extends State<FirstScreen> {
     if (permission == LocationPermission.deniedForever) {
       return Future.error('Location permissions are permanently denied');
     }
+
+    // insert into csv file
     _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             setState(() {
